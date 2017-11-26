@@ -8,9 +8,9 @@ import (
 	"path"
 	"strconv"
 
-	"github.com/chrislusf/weed-fs/go/glog"
-	"github.com/chrislusf/weed-fs/go/storage"
-	"github.com/chrislusf/weed-fs/go/util"
+	"github.com/chrislusf/seaweedfs/weed/glog"
+	"github.com/chrislusf/seaweedfs/weed/storage"
+	"github.com/chrislusf/seaweedfs/weed/util"
 )
 
 var (
@@ -60,7 +60,7 @@ func main() {
 
 	iterateEntries(datFile, indexFile, func(n *storage.Needle, offset int64) {
 		fmt.Printf("file id=%d name=%s size=%d dataSize=%d\n", n.Id, string(n.Name), n.Size, n.DataSize)
-		s, e := n.Append(newDatFile, storage.Version2)
+		s, _, e := n.Append(newDatFile, storage.Version2)
 		fmt.Printf("size %d error %v\n", s, e)
 	})
 

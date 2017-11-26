@@ -1,11 +1,55 @@
-Seaweed File System
-=======
+# SeaweedFS
 
-[![Build Status](https://travis-ci.org/chrislusf/weed-fs.svg?branch=master)](https://travis-ci.org/chrislusf/weed-fs)
-[![GoDoc](https://godoc.org/github.com/chrislusf/weed-fs/go?status.svg)](https://godoc.org/github.com/chrislusf/weed-fs/go)
-[![Wiki](https://img.shields.io/badge/docs-wiki-blue.svg)](https://github.com/chrislusf/weed-fs/wiki)
+[![Build Status](https://travis-ci.org/chrislusf/seaweedfs.svg?branch=master)](https://travis-ci.org/chrislusf/seaweedfs)
+[![GoDoc](https://godoc.org/github.com/chrislusf/seaweedfs/weed?status.svg)](https://godoc.org/github.com/chrislusf/seaweedfs/weed)
+[![Wiki](https://img.shields.io/badge/docs-wiki-blue.svg)](https://github.com/chrislusf/seaweedfs/wiki)
 
-![SeaweedFS Logo](https://raw.githubusercontent.com/chrislusf/weed-fs/master/note/seaweedfs.png)
+![SeaweedFS Logo](https://raw.githubusercontent.com/chrislusf/seaweedfs/master/note/seaweedfs.png)
+
+<h2 align="center">Supporting SeaweedFS</h2>
+
+SeaweedFS is Apache-licensed open source project, independent project with its ongoing development made 
+possible entirely thanks to the support by these awesome [backers](https://github.com/chrislusf/seaweedfs/blob/master/backers.md). 
+If you'd like to grow SeaweedFS even stronger, please consider to 
+<a href="https://www.patreon.com/seaweedfs">Sponsor SeaweedFS via Patreon</a>.
+
+Platinum ($2500/month), Gold ($500/month): put your company logo on the SeaweedFS github page
+Generous Backer($50/month), Backer($10/month): put your name on the SeaweedFS backer page.
+
+Your support will be really appreciated by me and other supporters!
+
+<h3 align="center"><a href="https://www.patreon.com/seaweedfs">Sponsors SeaweedFS via Patreon</a></h3>
+
+<h4 align="center">Platinum</h4>
+
+<p align="center">
+  <a href="" target="_blank">
+    Add your name or icon here
+  </a>
+</p>
+
+<h4 align="center">Gold</h4>
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="" target="_blank">
+          Add your name or icon here
+        </a>
+      </td>
+    </tr>
+    <tr></tr>
+  </tbody>
+</table>
+
+---
+
+
+- [Download Binaries for different platforms](https://github.com/chrislusf/seaweedfs/releases/latest)
+- [SeaweedFS Mailing List](https://groups.google.com/d/forum/seaweedfs)
+- [Wiki Documentation](https://github.com/chrislusf/seaweedfs/wiki)
+
 
 ## Introduction
 
@@ -14,45 +58,38 @@ SeaweedFS is a simple and highly scalable distributed file system. There are two
 1. to store billions of files!
 2. to serve the files fast!
 
-Instead of supporting full POSIX file system semantics, SeaweedFS choose to implement only a key~file mapping. Similar to the word "NoSQL", you can call it as "NoFS".
+Instead of supporting full POSIX file system semantics, SeaweedFS chooses to implement only a key->file mapping. Similar to "NoSQL", you might call it "NoFS".
 
-Instead of managing all file metadata in a central master, SeaweedFS choose to manages file volumes in the central master, and let volume servers manage files and the metadata. This relieves concurrency pressure from the central master and spreads file metadata into volume servers' memories, allowing faster file access with just one disk read operation!
+Instead of managing all file metadata in a central master, the central master only manages file volumes, and it lets these volume servers manage files and their metadata. This relieves concurrency pressure from the central master and spreads file metadata into volume servers, allowing faster file access (just one disk read operation).
 
-SeaweedFS models after [Facebook's Haystack design paper](http://www.usenix.org/event/osdi10/tech/full_papers/Beaver.pdf).
+There is only a 40 bytes disk storage overhead for each file's metadata. It is so simple with O(1) disk read that you are welcome to challenge the performance with your actual use cases.
 
-SeaweedFS costs only 40 bytes disk storage for each file's metadata. It is so simple with O(1) disk read that you are welcome to challenge the performance with your actual use cases.
-
-
-![](https://api.bintray.com/packages/chrislusf/Weed-FS/seaweed/images/download.png)
-https://bintray.com/chrislusf/Weed-FS/seaweed Download latest compiled binaries for different platforms here.
-
-http://groups.google.com/group/weed-file-system Seaweed File System Discussion Group
+SeaweedFS started by implementing [Facebook's Haystack design paper](http://www.usenix.org/event/osdi10/tech/full_papers/Beaver.pdf). SeaweedFS is currently growing, with more features on the way.
 
 ## Additional Features
 * Can choose no replication or different replication level, rack and data center aware
-* Automatic master servers failover. No single point of failure, SPOF.
+* Automatic master servers failover - no single point of failure (SPOF)
 * Automatic Gzip compression depending on file mime type
 * Automatic compaction to reclaimed disk spaces after deletion or update
-* Servers in the same cluster can have different disk spaces, different file systems, different OS
-* Adding/Removing servers do not cause any data re-balancing
+* Servers in the same cluster can have different disk spaces, file systems, OS etc.
+* Adding/Removing servers does **not** cause any data re-balancing
 * Optional [filer server][Filer] provides "normal" directories and files via http
-* For jpeg pictures, optionally fix the orientation.
+* Optionally fix the orientation for jpeg pictures
 * Support Etag, Accept-Range, Last-Modified, etc.
-* Support in-memory/leveldb/boltdb mode tuning for memory/performance balance.
+* Support in-memory/leveldb/boltdb/btree mode tuning for memory/performance balance.
 
-[Filer]: https://github.com/chrislusf/weed-fs/wiki/Filer
+[Filer]: https://github.com/chrislusf/seaweedfs/wiki/Filer
 
 ## Example Usage
-By default, the master node runs on port 9333, and the volume nodes runs on port 8080.
-Here I will start one master node, and two volume nodes on port 8080 and 8081. Ideally, they should be started from different machines. Here I just use localhost as example.
+By default, the master node runs on port 9333, and the volume nodes run on port 8080.
+Here I will start one master node, and two volume nodes on port 8080 and 8081. Ideally, they should be started from different machines. I just use localhost as an example.
 
-SeaweedFS uses HTTP REST operations to write, read, delete. The return results are JSON or JSONP format.
+SeaweedFS uses HTTP REST operations to write, read, delete. The responses are in JSON or JSONP format.
 
 ### Start Master Server
 
 ```
 > ./weed master
-
 ```
 
 ### Start Volume Servers ###
@@ -60,26 +97,26 @@ SeaweedFS uses HTTP REST operations to write, read, delete. The return results a
 ```
 > weed volume -dir="/tmp/data1" -max=5  -mserver="localhost:9333" -port=8080 &
 > weed volume -dir="/tmp/data2" -max=10 -mserver="localhost:9333" -port=8081 &
-
 ```
+
 
 ### Write File ###
 
-To upload a file, first, send a HTTP POST, PUT, or GET request to `/dir/assign` to get an fid and a volume server url:
+To upload a file: first, send a HTTP POST, PUT, or GET request to `/dir/assign` to get an `fid` and a volume server url:
 
 ```
 > curl -X POST http://localhost:9333/dir/assign
 {"count":1,"fid":"3,01637037d6","url":"127.0.0.1:8080","publicUrl":"localhost:8080"}
 ```
 
-Second, to store the file content, send a HTTP multipart PUT or POST request to `url + '/' + fid` from the response:
+Second, to store the file content, send a HTTP multi-part PUT or POST request to `url + '/' + fid` from the response:
 
 ```
 > curl -X PUT -F file=@/home/chris/myphoto.jpg http://127.0.0.1:8080/3,01637037d6
 {"size": 43234}
 ```
 
-For update, send another PUT or POST request with updated file content.
+To update, send another PUT or POST request with updated file content.
 
 For deletion, send an HTTP DELETE request to the same `url + '/' + fid` URL:
 
@@ -87,30 +124,31 @@ For deletion, send an HTTP DELETE request to the same `url + '/' + fid` URL:
 > curl -X DELETE http://127.0.0.1:8080/3,01637037d6
 ```
 ### Save File Id ###
-Now you can save the fid, 3,01637037d6 in this case, to some database field.
 
-The number 3 here, is a volume id. After the comma, it's one file key, 01, and a file cookie, 637037d6.
+Now you can save the `fid`, 3,01637037d6 in this case, to a database field.
 
-The volume id is an unsigned 32 bit integer. The file key is an unsigned 64bit integer. The file cookie is an unsigned 32bit integer, used to prevent URL guessing.
+The number 3 at the start represents a volume id. After the comma, it's one file key, 01, and a file cookie, 637037d6.
 
-The file key and file cookie are both coded in hex. You can store the <volume id, file key, file cookie> tuple in your own format, or simply store the fid as string.
+The volume id is an unsigned 32-bit integer. The file key is an unsigned 64-bit integer. The file cookie is an unsigned 32-bit integer, used to prevent URL guessing.
+
+The file key and file cookie are both coded in hex. You can store the <volume id, file key, file cookie> tuple in your own format, or simply store the `fid` as string.
 
 If stored as a string, in theory, you would need 8+1+16+8=33 bytes. A char(33) would be enough, if not more than enough, since most usage would not need 2^32 volumes.
 
-If space is really a concern, you can store the file id in your own format. You would need one 4-byte integer for volume id, 8-byte long number for file key, 4-byte integer for file cookie. So 16 bytes are enough (more than enough).
+If space is really a concern, you can store the file id in your own format. You would need one 4-byte integer for volume id, 8-byte long number for file key, 4-byte integer for file cookie. So 16 bytes are more than enough.
 
 ### Read File ###
 
-Here is the example on how to render the URL.
+Here is an example of how to render the URL.
 
-First lookup the volume server's URLs by the file's volumeId:
+First look up the volume server's URLs by the file's volumeId:
 
 ```
 > curl http://localhost:9333/dir/lookup?volumeId=3
 {"locations":[{"publicUrl":"localhost:8080","url":"localhost:8080"}]}
 ```
 
-(However, since usually there are not too many volume servers, and volumes does not move often, you can cache the results most of the time. Depends on the replication type, one volume can have multiple replica locations. Just randomly pick one location to read.)
+Since (usually) there are not too many volume servers, and volumes don't move often, you can cache the results most of the time. Depending on the replication type, one volume can have multiple replica locations. Just randomly pick one location to read.
 
 Now you can take the public url, render the url or directly read from the volume server via url:
 
@@ -118,7 +156,7 @@ Now you can take the public url, render the url or directly read from the volume
  http://localhost:8080/3,01637037d6.jpg
 ```
 
-Notice we add an file extension ".jpg" here. It's optional and just one way for the client to specify the file content type.
+Notice we add a file extension ".jpg" here. It's optional and just one way for the client to specify the file content type.
 
 If you want a nicer URL, you can use one of these alternative URL formats:
 
@@ -130,14 +168,23 @@ If you want a nicer URL, you can use one of these alternative URL formats:
  http://localhost:8080/3,01637037d6
 ```
 
+If you want to get a scaled version of an image, you can add some params:
+
+```
+http://localhost:8080/3/01637037d6.jpg?height=200&width=200
+http://localhost:8080/3/01637037d6.jpg?height=200&width=200&mode=fit
+http://localhost:8080/3/01637037d6.jpg?height=200&width=200&mode=fill
+```
+
 ### Rack-Aware and Data Center-Aware Replication ###
-SeaweedFS apply the replication strategy on a volume level. So when you are getting a file id, you can specify the replication strategy. For example:
+
+SeaweedFS applies the replication strategy at a volume level. So, when you are getting a file id, you can specify the replication strategy. For example:
 
 ```
 curl -X POST http://localhost:9333/dir/assign?replication=001
 ```
 
-Here is the meaning of the replication parameter:
+The replication parameter options are:
 
 ```
 000: no replication
@@ -150,7 +197,7 @@ Here is the meaning of the replication parameter:
 
 More details about replication can be found [on the wiki][Replication].
 
-[Replication]: https://github.com/chrislusf/weed-fs/wiki/Replication
+[Replication]: https://github.com/chrislusf/seaweedfs/wiki/Replication
 
 You can also set the default replication strategy when starting the master server.
 
@@ -163,9 +210,7 @@ Volume servers can start with a specific data center name:
  weed volume -dir=/tmp/2 -port=8081 -dataCenter=dc2
 ```
 
-Or the master server can determine the data center via volume server's IP address and settings in weed.conf file.
-
-Now when requesting a file key, an optional "dataCenter" parameter can limit the assigned volume to the specific data center. For example, this specifies that the assigned volume should be limited to 'dc1':
+When requesting a file key, an optional "dataCenter" parameter can limit the assigned volume to the specific data center. For example, this specifies that the assigned volume should be limited to 'dc1':
 
 ```
  http://localhost:9333/dir/assign?dataCenter=dc1
@@ -177,69 +222,76 @@ Now when requesting a file key, an optional "dataCenter" parameter can limit the
   * [Chunking large files][feat-3]
   * [Collection as a Simple Name Space][feat-4]
 
-[feat-1]: https://github.com/chrislusf/weed-fs/wiki/Failover-Master-Server
-[feat-2]: https://github.com/chrislusf/weed-fs/wiki/Optimization#insert-with-your-own-keys
-[feat-3]: https://github.com/chrislusf/weed-fs/wiki/Optimization#upload-large-files
-[feat-4]: https://github.com/chrislusf/weed-fs/wiki/Optimization#collection-as-a-simple-name-space
+[feat-1]: https://github.com/chrislusf/seaweedfs/wiki/Failover-Master-Server
+[feat-2]: https://github.com/chrislusf/seaweedfs/wiki/Optimization#insert-with-your-own-keys
+[feat-3]: https://github.com/chrislusf/seaweedfs/wiki/Optimization#upload-large-files
+[feat-4]: https://github.com/chrislusf/seaweedfs/wiki/Optimization#collection-as-a-simple-name-space
 
 ## Architecture ##
-Usually distributed file system split each file into chunks, and a central master keeps a mapping of a filename and a chunk index to chunk handles, and also which chunks each chunk server has.
 
-This has the draw back that the central master can not handle many small files efficiently, and since all read requests need to go through the chunk master, responses would be slow for many concurrent web users.
+Usually distributed file systems split each file into chunks, a central master keeps a mapping of filenames, chunk indices to chunk handles, and also which chunks each chunk server has.
 
-Instead of managing chunks, SeaweedFS choose to manage data volumes in the master server. Each data volume is size 32GB, and can hold a lot of files. And each storage node can has many data volumes. So the master node only needs to store the metadata about the volumes, which is fairly small amount of data and pretty static most of the time.
+The main drawback is that the central master can't handle many small files efficiently, and since all read requests need to go through the chunk master, might not scale well for many concurrent users.
 
-The actual file metadata is stored in each volume on volume servers. Since each volume server only manage metadata of files on its own disk, and only 16 bytes for each file, all file access can read file metadata just from memory and only needs one disk operation to actually read file data.
+Instead of managing chunks, SeaweedFS manages data volumes in the master server. Each data volume is size 32GB, and can hold a lot of files. And each storage node can have many data volumes. So the master node only needs to store the metadata about the volumes, which is fairly small amount of data and is generally stable.
+
+The actual file metadata is stored in each volume on volume servers. Since each volume server only manages metadata of files on its own disk, with only 16 bytes for each file, all file access can read file metadata just from memory and only needs one disk operation to actually read file data.
 
 For comparison, consider that an xfs inode structure in Linux is 536 bytes.
 
 ### Master Server and Volume Server ###
+
 The architecture is fairly simple. The actual data is stored in volumes on storage nodes. One volume server can have multiple volumes, and can both support read and write access with basic authentication.
 
 All volumes are managed by a master server. The master server contains volume id to volume server mapping. This is fairly static information, and could be cached easily.
 
-On each write request, the master server also generates a file key, which is a growing 64bit unsigned integer. Since the write requests are not as busy as read requests, one master server should be able to handle the concurrency well.
-
+On each write request, the master server also generates a file key, which is a growing 64-bit unsigned integer. Since write requests are not generally as frequent as read requests, one master server should be able to handle the concurrency well.
 
 ### Write and Read files ###
 
-When a client sends a write request, the master server returns <volume id, file key, file cookie, volume node url> for the file. The client then contact the volume node and POST the file content via REST.
+When a client sends a write request, the master server returns (volume id, file key, file cookie, volume node url) for the file. The client then contacts the volume node and POSTs the file content.
 
-When a client needs to read a file based on <volume id, file key, file cookie>, it can ask the master server by the <volum id> for the <volume node url, volume node public url>, or from cache. Then the client can HTTP GET the content via REST, or just render the URL on web pages and let browsers to fetch the content.
+When a client needs to read a file based on (volume id, file key, file cookie), it can ask the master server by the volume id for the (volume node url, volume node public url), or retrieve this from a cache. Then the client can GET the content, or just render the URL on web pages and let browsers fetch the content.
 
-Please see the example for details on write-read process.
+Please see the example for details on the write-read process.
 
 ### Storage Size ###
-In current implementation, each volume can be size of 8x2^32 bytes (32GiB). This is because of aligning contents to 8 bytes. We can be easily increased to 64G, or 128G, or more, by changing 2 lines of code, at the cost of some wasted padding space due to alignment.
+
+In the current implementation, each volume can be 8x2^32 bytes (32GiB). This is because of we align content to 8 bytes. We can easily increase this to 64G, or 128G, or more, by changing 2 lines of code, at the cost of some wasted padding space due to alignment.
 
 There can be 2^32 volumes. So total system size is 8 x 2^32 bytes x 2^32 = 8 x 4GiB x 4Gi = 128EiB (2^67 bytes, or 128 exbibytes).
 
 Each individual file size is limited to the volume size.
 
 ### Saving memory ###
+
 All file meta information on volume server is readable from memory without disk access. Each file just takes an 16-byte map entry of <64bit key, 32bit offset, 32bit size>. Of course, each map entry has its own the space cost for the map. But usually the disk runs out before the memory does.
 
 
-## Compared to Other File Systems##
-Frankly, I don't use other distributed file systems too often. All seems more complicated than necessary. Please correct me if anything here is wrong.
+## Compared to Other File Systems ##
+
+Most other distributed file systems seem more complicated than necessary.
 
 ### Compared to Ceph ###
-Ceph can be setup similar to SeaweedFS as a key~blob store. It is much more complicated, with the need to support layers on top of it. Here is a more detailed comparison. https://code.google.com/p/weed-fs/issues/detail?id=44
 
-SeaweedFS is meant to be fast and simple, both during usage and during setup. If you do not understand how it works when you reach here, we failed! Jokes aside, you should not need any consulting service for it.
+Ceph can be setup similar to SeaweedFS as a key->blob store. It is much more complicated, with the need to support layers on top of it. [Here is a more detailed comparison](https://github.com/chrislusf/seaweedfs/issues/120)
 
-SeaweedFS has a centralized master to lookup free volumes, while Ceph uses hashing to locate its objects. Having a centralized master makes it easy to code and manage. HDFS/GFS has the single name node for years. SeaweedFS now support multiple master nodes.
+SeaweedFS is meant to be fast and simple, both during usage and during setup. If you do not understand how it works when you reach here, we failed! Please raise an issue with any questions or update this file with clarifications.
+
+SeaweedFS has a centralized master to look up free volumes, while Ceph uses hashing to locate its objects. Having a centralized master makes it easy to code and manage. HDFS/GFS has the single name node for years. SeaweedFS now support multiple master nodes.
 
 Ceph hashing avoids SPOF, but makes it complicated when moving or adding servers.
 
 ### Compared to HDFS ###
+
 HDFS uses the chunk approach for each file, and is ideal for streaming large files.
 
 SeaweedFS is ideal for serving relatively smaller files quickly and concurrently.
 
 SeaweedFS can also store extra large files by splitting them into manageable data chunks, and store the file ids of the data chunks into a meta chunk. This is managed by "weed upload/download" tool, and the weed master or volume servers are agnostic about it.
 
-### Compared to MogileFS###
+### Compared to MogileFS ###
+
 SeaweedFS has 2 components: directory server, storage nodes.
 
 MogileFS has 3 components: tracers, database, storage nodes.
@@ -247,16 +299,18 @@ MogileFS has 3 components: tracers, database, storage nodes.
 One more layer means slower access, more operation complexity, more failure possibility.
 
 ### Compared to GlusterFS ###
-SeaweedFS is not POSIX compliant, and has simple implementation.
 
-GlusterFS is POSIX compliant, much more complex.
+SeaweedFS is not POSIX compliant, and has a simple implementation.
 
-### Compared to Mongo's GridFS ###
-Mongo's GridFS splits files into chunks and manage chunks in the central mongodb. For every read or write request, the database needs to query the metadata. It's OK if this is not a bottleneck yet, but for a lot of concurrent reads this unnecessary query could slow things down.
+GlusterFS is POSIX compliant, and is much more complex.
 
-Since files are chunked(default to 256KB), there will be multiple metadata readings and multiple chunk readings, linear to the file size. One  2.56MB file would require at least 20 disk read requests.
+### Compared to MongoDB's GridFS ###
 
-On the contrary, SeaweedFS uses large file volume of 32G size to store lots of files, and only manages file volumes in the master server. Each volume manages file metadata themselves. So all the file metadata is spread onto the volume nodes memories, and just one disk read is needed.
+Mongo's GridFS splits files into chunks and manage chunks in the central MongoDB. For every read or write request, the database needs to query the metadata. It's OK if this is not yet a bottleneck, but for a lot of concurrent reads this unnecessary query could slow things down.
+
+Since files are chunked(default to 256KB), there will be multiple metadata readings and multiple chunk readings, linear to the file size. One 2.56MB file would require at least 20 disk read requests.
+
+On the contrary, SeaweedFS uses large file volume of 32G size to store lots of files, and only manages file volumes in the master server. Each volume manages file metadata itself. So all file metadata is spread across the volume nodes, and just one disk read is needed.
 
 ## Dev plan ##
 
@@ -281,21 +335,17 @@ http://mercurial.selenic.com/downloads
 
 step 3: download, compile, and install the project by executing the following command
 
-go get github.com/chrislusf/weed-fs/go/weed
+go get github.com/chrislusf/seaweedfs/weed
 
 once this is done, you should see the executable "weed" under $GOPATH/bin
 
-step 4: after you modify your code locally, you could start a local build by calling "go install" under $GOPATH/src/github.com/chrislusf/weed-fs/go/weed
-
-## Reference
-
-For pre-compiled releases,
- https://bintray.com/chrislusf/Weed-FS/seaweed
+step 4: after you modify your code locally, you could start a local build by calling "go install" under $GOPATH/src/github.com/chrislusf/seaweedfs/weed
 
 ## Disk Related topics ##
 
 ### Hard Drive Performance ###
-When testing read performance on SeaweedFS, it basically becomes performance test your hard drive's random read speed. Hard Drive usually get 100MB/s~200MB/s.
+
+When testing read performance on SeaweedFS, it basically becomes performance test for your hard drive's random read speed. Hard Drive usually get 100MB/s~200MB/s.
 
 ### Solid State Disk
 
@@ -305,61 +355,57 @@ To modify or delete small files, SSD must delete a whole block at a time, and mo
 
 POSIX support
 
-
 ## Benchmark
 
-My Own Unscientific Single Machine Results on Mac Book with Solid State Disk, CPU: 1 Intel Core i7 2.2GHz.
+My Own Unscientific Single Machine Results on Mac Book with Solid State Disk, CPU: 1 Intel Core i7 2.6GHz.
 
 Write 1 million 1KB file:
 ```
-Concurrency Level:      64
-Time taken for tests:   182.456 seconds
+Concurrency Level:      16
+Time taken for tests:   88.796 seconds
 Complete requests:      1048576
 Failed requests:        0
-Total transferred:      1073741824 bytes
-Requests per second:    5747.01 [#/sec]
-Transfer rate:          5747.01 [Kbytes/sec]
+Total transferred:      1106764659 bytes
+Requests per second:    11808.87 [#/sec]
+Transfer rate:          12172.05 [Kbytes/sec]
 
 Connection Times (ms)
               min      avg        max      std
-Total:        0.3      10.9       430.9      5.7
+Total:        0.2      1.3       44.8      0.9
 
 Percentage of the requests served within a certain time (ms)
-   50%     10.2 ms
-   66%     12.0 ms
-   75%     12.6 ms
-   80%     12.9 ms
-   90%     14.0 ms
-   95%     14.9 ms
-   98%     16.2 ms
-   99%     17.3 ms
-  100%    430.9 ms
+   50%      1.1 ms
+   66%      1.3 ms
+   75%      1.5 ms
+   80%      1.7 ms
+   90%      2.1 ms
+   95%      2.6 ms
+   98%      3.7 ms
+   99%      4.6 ms
+  100%     44.8 ms
 ```
 
 Randomly read 1 million files:
 ```
-Concurrency Level:      64
-Time taken for tests:   80.732 seconds
+Concurrency Level:      16
+Time taken for tests:   34.263 seconds
 Complete requests:      1048576
 Failed requests:        0
-Total transferred:      1073741824 bytes
-Requests per second:    12988.37 [#/sec]
-Transfer rate:          12988.37 [Kbytes/sec]
+Total transferred:      1106762945 bytes
+Requests per second:    30603.34 [#/sec]
+Transfer rate:          31544.49 [Kbytes/sec]
 
 Connection Times (ms)
               min      avg        max      std
-Total:        0.0      4.7       254.3      6.3
+Total:        0.0      0.5       20.7      0.7
 
 Percentage of the requests served within a certain time (ms)
-   50%      2.6 ms
-   66%      2.9 ms
-   75%      3.7 ms
-   80%      4.7 ms
-   90%     10.3 ms
-   95%     16.6 ms
-   98%     26.3 ms
-   99%     34.8 ms
-  100%    254.3 ms
+   50%      0.4 ms
+   75%      0.5 ms
+   95%      0.6 ms
+   98%      0.8 ms
+   99%      1.2 ms
+  100%     20.7 ms
 ```
 
 
